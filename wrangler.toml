@@ -1,0 +1,18 @@
+# اسم ورکر تو اکانت کلودفلرتون
+name = "anonydl"
+
+# فایل اصلی کد ورکر
+main = "worker.js"
+
+# اتصال به KV Namespace برای ذخیره اطلاعات لینک‌ها
+# شما باید یک KV Namespace تو داشبورد کلادفلر بسازید
+# و شناسه (ID) آن را اینجا قرار دهید.
+kv_namespaces = [
+  { binding = "LINKS_KV", id = "LINKS_KV" }
+]
+
+# متغیر های مورد نیاز
+[vars]
+WORKER_DOMAIN = "https://dl.egistration.ir" # دامنه ورکر خود را وارد کنید
+CHANNEL_ID = -1001859564037 # آیدی عددی چنلی که بات توش جوین و ادمینه برای جوین اجباری
+CHANNEL_USERNAME = "@NetXray" # آیدی یا لینک ورود به چنل جوین اجباری
