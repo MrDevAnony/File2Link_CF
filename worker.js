@@ -7,8 +7,6 @@
  * - CHANNEL_ID (Variable): The numeric ID of the required channel (e.g., -100123456789).
  * - CHANNEL_USERNAME (Variable): The public username of the channel (e.g., @MyChannel).
  * - LINKS_KV (KV Binding): The KV namespace for storing link metadata.
- *
- * https://t.me/DevAmirw
  */
 
 // --- Constants ---
@@ -175,6 +173,7 @@ function extractFileInfo(message) {
  * @returns {Promise<boolean>}
  */
 async function isUserMember(userId) {
+    // Define API URL here to ensure BOT_TOKEN is available
     const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
     try {
         const response = await fetch(`${TELEGRAM_API_URL}/getChatMember?chat_id=${CHANNEL_ID}&user_id=${userId}`);
@@ -193,6 +192,7 @@ async function isUserMember(userId) {
  * @returns {Promise<Response>} A Response object to satisfy the event handler.
  */
 async function sendTelegramMessage(chatId, text) {
+    // Define API URL here to ensure BOT_TOKEN is available
     const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
     await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
         method: 'POST',
@@ -208,6 +208,7 @@ async function sendTelegramMessage(chatId, text) {
  * @returns {Promise<string|null>} The full URL to download the file or null if failed.
  */
 async function getTelegramFileLink(fileId) {
+    // Define API URL here to ensure BOT_TOKEN is available
     const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
     try {
         const response = await fetch(`${TELEGRAM_API_URL}/getFile?file_id=${fileId}`);
