@@ -1,17 +1,17 @@
 /**
- * A Cloudflare Worker that acts as a Telegram bot to generate direct
- * download links for files up to 20MB.
+ * A Cloudflare Worker that acts as a Telegram bot to generate direct download links.
  *
- * - It checks for channel membership before allowing usage.
- * - It proxies files directly from Telegram's servers.
- * - It uses Cloudflare KV to store link metadata.
+ * Configuration is managed via the Cloudflare dashboard:
+ * - BOT_TOKEN (Secret): Your secret Telegram bot token.
+ * - WORKER_DOMAIN (Variable): Your worker's full URL (e.g., https://your-worker.your-name.workers.dev).
+ * - CHANNEL_ID (Variable): The numeric ID of the required channel (e.g., -100123456789).
+ * - CHANNEL_USERNAME (Variable): The public username of the channel (e.g., @MyChannel).
+ * - LINKS_KV (KV Binding): The KV namespace for storing link metadata.
  *
  * https://t.me/DevAmirw
- * https://github.com/MrDevAnony/File2Link_CF
  */
 
 // --- Constants ---
-const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20 MB (Telegram Bot API download limit)
 
 // --- Event Listener ---
@@ -26,13 +26,12 @@ addEventListener('fetch', event => {
  */
 async function handleRequest(request) {
     const url = new URL(request.url);
-    const pathParts = url.pathname.split('/'); // e.g., ["", "file", "12345", "abc-def"]
+    const pathParts = url.pathname.split('/');
 
     switch (pathParts[1]) {
         case 'webhook':
             return handleTelegramWebhook(request);
         case 'file':
-            // URL format: /file/{userId}/{token}
             const userId = pathParts[2];
             const token = pathParts[3];
             return serveFile(userId, token);
@@ -53,7 +52,7 @@ async function handleTelegramWebhook(request) {
 
     const update = await request.json();
     if (!update.message?.chat?.id || !update.message?.from?.id) {
-        return new Response('OK', { status: 200 }); // Acknowledge to prevent retries
+        return new Response('OK', { status: 200 });
     }
 
     const { message } = update;
@@ -92,7 +91,6 @@ async function handleTelegramWebhook(request) {
 
 /**
  * Serves a file by looking up its metadata in KV and proxying from Telegram.
- * This is highly efficient as it uses a direct KV.get() call.
  * @param {string} userId The user ID from the URL.
  * @param {string} token The unique token from the URL.
  * @returns {Promise<Response>}
@@ -112,17 +110,13 @@ async function serveFile(userId, token) {
     const telegramFileUrl = await getTelegramFileLink(meta.fileId);
 
     if (!telegramFileUrl) {
-        // This can happen if the file_id is old and Telegram has expired the download path.
-        // We can clean up the KV entry here.
         await LINKS_KV.delete(key);
         return new Response('❌ Could not retrieve file from Telegram. The link may have expired.', { status: 502 });
     }
 
-    // Fetch the file from Telegram and stream it to the client.
     const fileResponse = await fetch(telegramFileUrl);
     const headers = new Headers(fileResponse.headers);
 
-    // Set a friendly filename for the download.
     headers.set('Content-Disposition', `attachment; filename="${encodeURIComponent(meta.fileName)}"`);
 
     return new Response(fileResponse.body, {
@@ -181,6 +175,7 @@ function extractFileInfo(message) {
  * @returns {Promise<boolean>}
  */
 async function isUserMember(userId) {
+    const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
     try {
         const response = await fetch(`${TELEGRAM_API_URL}/getChatMember?chat_id=${CHANNEL_ID}&user_id=${userId}`);
         const data = await response.json();
@@ -198,6 +193,7 @@ async function isUserMember(userId) {
  * @returns {Promise<Response>} A Response object to satisfy the event handler.
  */
 async function sendTelegramMessage(chatId, text) {
+    const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
     await fetch(`${TELEGRAM_API_URL}/sendMessage`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -212,6 +208,7 @@ async function sendTelegramMessage(chatId, text) {
  * @returns {Promise<string|null>} The full URL to download the file or null if failed.
  */
 async function getTelegramFileLink(fileId) {
+    const TELEGRAM_API_URL = `https://api.telegram.org/bot${BOT_TOKEN}`;
     try {
         const response = await fetch(`${TELEGRAM_API_URL}/getFile?file_id=${fileId}`);
         const data = await response.json();
