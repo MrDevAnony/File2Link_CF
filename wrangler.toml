@@ -8,7 +8,7 @@ main = "worker.js"
 # شما باید یک KV Namespace تو داشبورد کلادفلر بسازید
 # و شناسه (ID) آن را اینجا قرار دهید.
 kv_namespaces = [
-  { binding = "LINKS_KV", id = "LINKS_KV" }
+  { binding = "LINKS_KV", id = "a3c5386615614f35b672dd83a880af7f" }
 ]
 
 # بذارید همین باشه چون کلودفلر گیر میده نباشه
