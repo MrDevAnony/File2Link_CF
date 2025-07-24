@@ -11,6 +11,9 @@ kv_namespaces = [
   { binding = "LINKS_KV", id = "LINKS_KV" }
 ]
 
+# بذارید همین باشه چون کلودفلر گیر میده نباشه
+compatibility_date = "2025-07-24"
+
 # متغیر های مورد نیاز
 [vars]
 WORKER_DOMAIN = "https://dl.egistration.ir" # دامنه ورکر خود را وارد کنید
